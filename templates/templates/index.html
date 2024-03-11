@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Recognizer</title>
+</head>
+<body>
+<h1>Digit Recognizer</h1>
+
+<form method="post" action="/predict" enctype="multipart/form-data">
+    <label for="image">Upload a digit image:</label>
+    <input type="file" name="image" id="image" accept=".png, .jpg, .jpeg" required>
+    <br>
+
+    <button type="submit">Predict</button>
+</form>
+
+{% if digit is defined %}
+<h2>Prediction Result:</h2>
+<p>The predicted digit is: {{ digit }}</p>
+{% endif %}
+
+{% if error_message is defined %}
+<h2>Error:</h2>
+<p>{{ error_message }}</p>
+{% endif %}
+</body>
+</html>
