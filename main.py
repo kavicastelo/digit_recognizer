@@ -12,7 +12,7 @@ model = tf.keras.models.load_model('data_recognizer.h5')
 
 @app.route('/')
 def home():
-    return render_template('templates/index.html')
+    return render_template('templates/templates/index.html')
 
 
 @app.route('/predict', methods=['POST'])
@@ -33,11 +33,11 @@ def predict():
 
         digit = np.argmax(predictions)
 
-        return render_template('templates/index.html', digit=int(digit))
+        return render_template('templates/templates/index.html', digit=int(digit))
 
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
-        return render_template('templates/index.html', error_message=error_message)
+        return render_template('templates/templates/index.html', error_message=error_message)
 
 
 def preprocess_image(img_data):

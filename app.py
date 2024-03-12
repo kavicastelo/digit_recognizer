@@ -1,31 +1,25 @@
-from image_processing import preprocess_image
-from prediction import predict_digit
-
-from flask import Flask, render_template, request, jsonify
 import numpy as np
-import tensorflow as tf
 from PIL import Image
 from io import BytesIO
+import webview
+import tensorflow as tf
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# Load the model using joblib
 model = tf.keras.models.load_model('data_recognizer.h5')
 
 
 @app.route('/')
 def home():
-    return render_template('templates/index.html')
+    return render_template('index.html')
 
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get image file from the HTML form
         file = request.files['image']
         img_array = preprocess_image(file.read())
-
-        # Make predictions using a separate module
         digit = predict_digit(model, img_array)
 
         return jsonify({'digit': int(digit)})
@@ -35,5 +29,22 @@ def predict():
         return jsonify({'error_message': error_message})
 
 
+def preprocess_image(img_data):
+    img = Image.open(BytesIO(img_data))
+    img = img.resize((28, 28))
+    img_array = np.array(img.convert('L'))
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = img_array / 255.0
+    return img_array
+
+
+def predict_digit(model, img_array):
+    img_array_flat = img_array.flatten()
+    predictions = model.predict(np.array([img_array_flat]))
+    digit = np.argmax(predictions)
+    return digit
+
+
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True)
+    webview.create_window('Digit Recognizer', app, width=800, height=600)
+    webview.start()

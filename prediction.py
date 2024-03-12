@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def predict_digit(model, img_array):
     # Flatten the image data
     img_array_flat = img_array.flatten()
