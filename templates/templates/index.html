@@ -4,26 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digit Recognizer</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #007bff;
+            text-align: center;
+        }
+
+        form {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #result {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #loading-spinner {
+            display: none;
+        }
+
+        .error-message {
+            color: #dc3545;
+        }
+    </style>
 </head>
 <body>
-<h1>Digit Recognizer</h1>
+<div class="container">
+    <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 90vh">
+        <h1>Digit Recognizer</h1>
 
-<form method="post" action="/predict" enctype="multipart/form-data">
-    <label for="image">Upload a digit image:</label>
-    <input type="file" name="image" id="image" accept=".png, .jpg, .jpeg" required>
-    <br>
+        <form id="prediction-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="image">Upload a digit image:</label>
+                <input type="file" class="form-control-file" id="image" accept=".png, .jpg, .jpeg" required>
+            </div>
 
-    <button type="submit">Predict</button>
-</form>
+            <button type="submit" class="btn btn-primary">Predict</button>
+            <div id="loading-spinner" class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </form>
 
-{% if digit is defined %}
-<h2>Prediction Result:</h2>
-<p>The predicted digit is: {{ digit }}</p>
-{% endif %}
+        <div id="result">
+            <h2>Prediction Result:</h2>
+            <p id="predicted-digit"></p>
+            <p class="error-message" id="error-message"></p>
+        </div>
+    </div>
+</div>
 
-{% if error_message is defined %}
-<h2>Error:</h2>
-<p>{{ error_message }}</p>
-{% endif %}
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    document.getElementById('prediction-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Display loading spinner
+        document.getElementById('loading-spinner').style.display = 'inline-block';
+
+        // Get image file
+        var fileInput = document.getElementById('image');
+        var imageFile = fileInput.files[0];
+
+        // Prepare form data
+        var formData = new FormData();
+        formData.append('image', imageFile);
+
+        // Send AJAX request
+        fetch('/predict', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading spinner
+                document.getElementById('loading-spinner').style.display = 'none';
+
+                // Display result or error message
+                if (data.digit !== undefined) {
+                    document.getElementById('predicted-digit').textContent = 'The predicted digit is: ' + data.digit;
+                    document.getElementById('error-message').textContent = '';
+                } else if (data.error_message !== undefined) {
+                    document.getElementById('predicted-digit').textContent = '';
+                    document.getElementById('error-message').textContent = data.error_message;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('predicted-digit').textContent = '';
+                document.getElementById('error-message').textContent = 'An error occurred during the prediction. Please try again.';
+            });
+    });
+</script>
 </body>
 </html>
